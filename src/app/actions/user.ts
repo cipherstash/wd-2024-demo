@@ -2,13 +2,15 @@
 import { EncryptedUser } from "@/components/createUserForm"
 import { Pool } from 'pg'
 
+const TABLE_NAME = 'wd_users'
+
 export async function create({firstName, lastName, email}: EncryptedUser) {
     const pool = new Pool({
         connectionString: process.env.DATABASE_URL,
     });
     const client = await pool.connect();
-    await client.query("CREATE TABLE IF NOT EXISTS users (first_name text, last_name text, email text)");
-    await client.query("INSERT INTO users (first_name, last_name, email) VALUES ($1, $2, $3)", [
+    await client.query(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (first_name text, last_name text, email text)`);
+    await client.query(`INSERT INTO ${TABLE_NAME} (first_name, last_name, email) VALUES ($1, $2, $3)`, [
         firstName,
         lastName,
         email,
@@ -23,6 +25,6 @@ export async function list(): Promise<EncryptedUser[]> {
         connectionString: process.env.DATABASE_URL,
     })
     const client = await pool.connect()
-    const result = await client.query(`SELECT first_name as "firstName", last_name as "lastName", email FROM users`)
+    const result = await client.query(`SELECT first_name as "firstName", last_name as "lastName", email FROM ${TABLE_NAME}`)
     return result.rows
 }
